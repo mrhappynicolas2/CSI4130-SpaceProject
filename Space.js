@@ -6,6 +6,7 @@ import { initKeyboardControls, heightController, lengthController, fpsController
 import { OrbitControls } from 'three/examples/jsm/Addons.js';
 import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js'; // allows loading models in .glb format
 import { FireEffect } from './fire.js'; // fire particles
+import FireParticleEffect from './fireParticleEffect/fire.js';
 
 // all content and drawings will be organized in a scenegraph
 const scene = new THREE.Scene();
@@ -45,6 +46,8 @@ verticalGrid.position.z = -25; // move the grid to the back of the scene
 scene.add(controls, axesHelper, ambientLight);
 
 const hitboxes = []
+
+const fireParticleSystem = new FireParticleEffect(scene)
 
 // variables to keep track of rocket and bullets
 let rocketGroup, rocketHealth, rocket;
@@ -712,9 +715,9 @@ function handleCollision(asteroidGroup){
     updateHealthBar()
 }
 
-    // FPS related stuff
-    let previousDelta = 0
-    function animate(currentDelta) {
+// FPS related stuff
+let previousDelta = 0
+function animate(currentDelta) {
 
     if (showHitboxController.getValue()){
         hitboxes.forEach(hitbox=>{
@@ -729,7 +732,7 @@ function handleCollision(asteroidGroup){
     }
 
     checkForAsteroidCollision()
-    
+    fireParticleSystem.update()
 
     // console.log()
     

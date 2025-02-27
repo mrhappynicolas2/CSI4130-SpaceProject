@@ -6,7 +6,7 @@ import * as THREE from 'three';
 export class FireEffect {
     constructor(scene) {
         this.scene = scene;
-        this.particleCount = 200;
+        this.particleCount =0 ;
         this.fireParticles = [];
 
         // Particle system
@@ -17,13 +17,13 @@ export class FireEffect {
         this.particleGeometry.setAttribute('position', new THREE.BufferAttribute(positions, 3));
         this.particleGeometry.setAttribute('color', new THREE.BufferAttribute(colors, 3));
 
-        const fireTexture = new THREE.TextureLoader().load('models/fire.jpeg');
+        const fireTexture = new THREE.TextureLoader().load('models/fire2.png');
         this.particleMaterial = new THREE.PointsMaterial({
-            color: 0xffa500,
-            size: 0.05, // Base size of fire particles
+            color: 'red',
+            size: 1, // Base size of fire particles
             map: fireTexture,
             transparent: true,
-            blending: THREE.AdditiveBlending,
+            blending: THREE.NormalBlending,
             vertexColors: true
         });
 
@@ -50,10 +50,12 @@ export class FireEffect {
             Math.random() * -1 * size // More aggressive spread
         ).normalize().multiplyScalar(0.2 * size); // Increased movement with size
 
-        const lifeTime = (50 + Math.random() * 30) * (size * 0.8); // Particles last longer if size is larger
+        const lifeTime = 50
+        // const lifeTime = (50 + Math.random() * 30) * (size * 0.8); // Particles last longer if size is larger
         const colorAttribute = this.particleGeometry.getAttribute('color');
         const startColor = new THREE.Color(0xffa500);
         colorAttribute.setXYZ(index, startColor.r, startColor.g, startColor.b);
+        // console.log(lifeTime)
 
         return { index, direction, lifeTime };
     }
@@ -70,7 +72,8 @@ export class FireEffect {
                 positionAttribute.getZ(particle.index)
             );
             vertex.add(particle.direction);
-            positionAttribute.setXYZ(particle.index, vertex.x, vertex.y, vertex.z);
+            // console.log(particle)
+            // positionAttribute.setXYZ(particle.index, vertex.x, vertex.y, vertex.z);
 
             particle.lifeTime--;
 
