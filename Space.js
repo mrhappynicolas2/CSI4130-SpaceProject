@@ -7,6 +7,7 @@ import { OrbitControls } from 'three/examples/jsm/Addons.js';
 import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js'; // allows loading models in .glb format
 import { FireEffect } from './fire.js'; // fire particles
 import FireParticleEffect from './fireParticleEffect/fire.js';
+import SmokeEffect from './rocketSmokeParticleEffect/smoke.js';
 
 // all content and drawings will be organized in a scenegraph
 const scene = new THREE.Scene();
@@ -68,6 +69,8 @@ let lastSecondaryShotTimes = 0;
 
 // variable for all the stars in the background
 const starField = createStarField();
+
+const smokeEffect = new SmokeEffect(scene, new THREE.Vector3(0, 0, 0))
 
 /**
  * keys state
@@ -744,6 +747,7 @@ function animate(currentDelta) {
     fireParticleSystems.forEach(fireParticleSystem=>{
         fireParticleSystem.update()
     })
+    smokeEffect.update()
 
     // console.log()
     

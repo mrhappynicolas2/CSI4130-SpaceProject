@@ -1,9 +1,9 @@
 import * as THREE from 'three';
 
 /**
- * Smoke particle effect class to create smoke particles
+ * SmokeEffect class to create smoke particles
  */
-export default class SmokeEFfect {
+export default class SmokeEffect {
 
     constructor(scene, particlesPosition) {
 
@@ -13,53 +13,36 @@ export default class SmokeEFfect {
         this.particles = []
         this.particleCount = 50
         
-        for (let i = 0; i < this.particleCount; i++){
-            this.createParticle()
-        }
-
         this.geometry = new THREE.BufferGeometry()
         this.geometry.setAttribute('position', 
             new THREE.BufferAttribute(new Float32Array(this.particleCount * 3), 3))
         this.geometry.setAttribute('color', 
-            new THREE.BufferAttribute(new Float32Array(this.particleCount * 4)), 4)
-
-        // this.material = new THREE.PointsMaterial({
-        //     map: new THREE.TextureLoader().load('/models/fire2.png'),
-        //     size: 0.5,
-        //     vertexColors: true,
-        //     transparent: true,
-        //     depthTest: true,
-        //     depthWrite: false,
-        //     blending: THREE.AdditiveBlending,
-        //     alphaTest: 0.01,
-            
-        // }) 
+            new THREE.BufferAttribute(new Float32Array(this.particleCount * 3)), 3)
 
         this.material = new THREE.ShaderMaterial({
             uniforms: {
-                diffuseTexture: { value: new THREE.TextureLoader().load( '/models/fire2.png' ) },
+                diffuseTexture: { value: new THREE.TextureLoader().load( '/models/smoke.png' ) },
                 pointMultiplier: { value: 175 }
             },
             vertexShader: `
                 uniform float pointMultiplier;
 
-                attribute vec3 color;
                 varying vec4 vColor;
 
                 void main(){
                     gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
                     gl_PointSize = pointMultiplier / gl_Position.w;
 
-                    vColor = vec4(color, 0.0);
+                    vColor = vec4(color, 1.0);
                 }
             `,
             fragmentShader: `
                 uniform sampler2D diffuseTexture;
 
-                varying vec4 vColor;
+                // varying vec4 vColor;
 
                 void main(){
-                    gl_FragColor = texture2D(diffuseTexture, gl_PointCoord) * vColor;
+                    gl_FragColor = texture2D(diffuseTexture, gl_PointCoord);
                 }
             `,
             transparent: true,
@@ -80,8 +63,11 @@ export default class SmokeEFfect {
             position: new THREE.Vector3(this.particlesPosition.x, this.particlesPosition.y, this.particlesPosition.z),
             direction: new THREE.Vector3(Math.random() - 0.5, Math.random() - 0.5, -1)
             .normalize().multiplyScalar(this.particleSpeed),
-            timeToLive: 50
+            timeToLive: 50,
+            alpha: 1.0
         })
+
+        this.update()
 
     }
 
@@ -98,23 +84,22 @@ export default class SmokeEFfect {
             positions[i * 3 + 1] = this.particles[i].position.y
             positions[i * 3 + 2] = this.particles[i].position.z
 
-            // let color = new THREE.Color().setHex(0xff3333)
-            let color = new THREE.Color().setHex(0x00ff00)
+            let color = new THREE.Color().setHex(0xff3333)
 
-            if (this.particles[i].timeToLive < 20){
-                color = new THREE.Color().setHex(0x000000)
-            }
+            // if (this.particles[i].timeToLive < 20){
+            //     color = new THREE.Color().setHex(0x000000)
+            // }
 
             colors[i * 3] = color.r
             colors[i * 3 + 1] = color.g
             colors[i * 3 + 2] = color.b
-            colors[i * 3 + 3] = 0
+
 
             this.particles[i].timeToLive -= 1
         }
 
         this.geometry.setAttribute('position', new THREE.BufferAttribute(positions, 3))
-        this.geometry.setAttribute('color', new THREE.BufferAttribute(colors, 4))
+        this.geometry.setAttribute('color', new THREE.BufferAttribute(colors, 3))
 
         if (this.particles.length < this.particleCount){
             this.createParticle()

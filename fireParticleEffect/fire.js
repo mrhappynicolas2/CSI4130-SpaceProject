@@ -17,8 +17,7 @@ export default class FireEffect {
         this.geometry.setAttribute('position', 
             new THREE.BufferAttribute(new Float32Array(this.particleCount * 3), 3))
         this.geometry.setAttribute('color', 
-            new THREE.BufferAttribute(new Float32Array(this.particleCount * 4)), 4)
-
+            new THREE.BufferAttribute(new Float32Array(this.particleCount * 3)), 3)
 
         this.material = new THREE.ShaderMaterial({
             uniforms: {
@@ -34,7 +33,7 @@ export default class FireEffect {
                     gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
                     gl_PointSize = pointMultiplier / gl_Position.w;
 
-                    vColor = color;
+                    vColor = vec4(color, 1.0);
                 }
             `,
             fragmentShader: `
@@ -64,7 +63,8 @@ export default class FireEffect {
             position: new THREE.Vector3(this.particlesPosition.x, this.particlesPosition.y, this.particlesPosition.z),
             direction: new THREE.Vector3(Math.random() - 0.5, Math.random() - 0.5, -1)
             .normalize().multiplyScalar(this.particleSpeed),
-            timeToLive: 50
+            timeToLive: 50,
+            alpha: 1.0
         })
 
         this.update()
@@ -86,20 +86,20 @@ export default class FireEffect {
 
             let color = new THREE.Color().setHex(0xff3333)
 
-            if (this.particles[i].timeToLive < 20){
-                color = new THREE.Color().setHex(0x000000)
-            }
+            // if (this.particles[i].timeToLive < 20){
+            //     color = new THREE.Color().setHex(0x000000)
+            // }
 
             colors[i * 3] = color.r
             colors[i * 3 + 1] = color.g
             colors[i * 3 + 2] = color.b
-            colors[i * 3 + 3] = 0
+
 
             this.particles[i].timeToLive -= 1
         }
 
         this.geometry.setAttribute('position', new THREE.BufferAttribute(positions, 3))
-        this.geometry.setAttribute('color', new THREE.BufferAttribute(colors, 4))
+        this.geometry.setAttribute('color', new THREE.BufferAttribute(colors, 3))
 
         if (this.particles.length < this.particleCount){
             this.createParticle()
