@@ -70,7 +70,7 @@ let lastSecondaryShotTimes = 0;
 // variable for all the stars in the background
 const starField = createStarField();
 
-const smokeEffect = new SmokeEffect(scene, new THREE.Vector3(0, 0, 0))
+const smokeEffect = new SmokeEffect(scene, camera, new THREE.Vector3(0, 2, 0))
 
 /**
  * keys state
@@ -747,6 +747,7 @@ function animate(currentDelta) {
     fireParticleSystems.forEach(fireParticleSystem=>{
         fireParticleSystem.update()
     })
+
     smokeEffect.update()
 
     // console.log()

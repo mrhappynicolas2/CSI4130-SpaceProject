@@ -5,19 +5,24 @@ import * as THREE from 'three';
  */
 export default class SmokeEffect {
 
-    constructor(scene, particlesPosition) {
+    constructor(scene, camera, particlesPosition) {
 
+        this.timer = 0
         this.particlesPosition = particlesPosition
         this.scene = scene
-        this.particleSpeed = 0.01
+        this.camera = camera
+        
         this.particles = []
-        this.particleCount = 50
+
+        this.PARTICLE_SPEED = 0.001
+        this.MAX_TIME_TO_LIVE = 1000
+        this.PARTICLE_COUNT = 100
         
         this.geometry = new THREE.BufferGeometry()
         this.geometry.setAttribute('position', 
-            new THREE.BufferAttribute(new Float32Array(this.particleCount * 3), 3))
+            new THREE.BufferAttribute(new Float32Array(this.PARTICLE_COUNT * 3), 3))
         this.geometry.setAttribute('color', 
-            new THREE.BufferAttribute(new Float32Array(this.particleCount * 3)), 3)
+            new THREE.BufferAttribute(new Float32Array(this.PARTICLE_COUNT * 3)), 3)
 
         this.material = new THREE.ShaderMaterial({
             uniforms: {
@@ -39,17 +44,17 @@ export default class SmokeEffect {
             fragmentShader: `
                 uniform sampler2D diffuseTexture;
 
-                // varying vec4 vColor;
+                varying vec4 vColor;
 
                 void main(){
-                    gl_FragColor = texture2D(diffuseTexture, gl_PointCoord);
+                    gl_FragColor = texture2D(diffuseTexture, gl_PointCoord) * vColor;
                 }
             `,
             transparent: true,
             depthTest: true,
             depthWrite: false,
             vertexColors: true,
-            blending: THREE.AdditiveBlending
+            blending: THREE.NormalBlending
         })
 
         const points = new THREE.Points(this.geometry, this.material)
@@ -59,12 +64,30 @@ export default class SmokeEffect {
 
     createParticle(){
 
+        const particleSpread = 0.2
+
         this.particles.push({
             position: new THREE.Vector3(this.particlesPosition.x, this.particlesPosition.y, this.particlesPosition.z),
-            direction: new THREE.Vector3(Math.random() - 0.5, Math.random() - 0.5, -1)
-            .normalize().multiplyScalar(this.particleSpeed),
-            timeToLive: 50,
+            direction: new THREE.Vector3(
+                Math.random() * 2 * particleSpread - particleSpread,
+                Math.random() * 2 * particleSpread - particleSpread,
+                -1)
+            .normalize().multiplyScalar(this.PARTICLE_SPEED),
+            timeToLive: this.MAX_TIME_TO_LIVE,
             alpha: 1.0
+        })
+
+        this.particles.sort((a, b)=>{
+            const d1 = this.camera.position.distanceTo(a.position)
+            const d2 = this.camera.position.distanceTo(b.position)
+
+            if (d1 > d2){
+                return -1
+            }
+            if (d1 < d2){
+                return 1
+            }
+            return 0
         })
 
         this.update()
@@ -73,8 +96,14 @@ export default class SmokeEffect {
 
     update(){
 
-        const positions = new Float32Array(this.particleCount * 3)
-        const colors = new Float32Array(this.particleCount * 3)
+        this.timer ++
+        if (this.timer == 50){
+            this.createParticle()
+            this.timer = 0
+        }
+
+        const positions = new Float32Array(this.PARTICLE_COUNT * 3)
+        const colors = new Float32Array(this.PARTICLE_COUNT * 3)
 
         for (let i = 0; i < this.particles.length; i++){
 
@@ -84,10 +113,14 @@ export default class SmokeEffect {
             positions[i * 3 + 1] = this.particles[i].position.y
             positions[i * 3 + 2] = this.particles[i].position.z
 
-            let color = new THREE.Color().setHex(0xff3333)
+            let color = new THREE.Color().setRGB(
+                this.particles[i].timeToLive / this.MAX_TIME_TO_LIVE,
+                this.particles[i].timeToLive / this.MAX_TIME_TO_LIVE,
+                this.particles[i].timeToLive / this.MAX_TIME_TO_LIVE,
+            )
 
             // if (this.particles[i].timeToLive < 20){
-            //     color = new THREE.Color().setHex(0x000000)
+            //     color = new THREE.Color().setHex(0xff0000)
             // }
 
             colors[i * 3] = color.r
@@ -101,9 +134,10 @@ export default class SmokeEffect {
         this.geometry.setAttribute('position', new THREE.BufferAttribute(positions, 3))
         this.geometry.setAttribute('color', new THREE.BufferAttribute(colors, 3))
 
-        if (this.particles.length < this.particleCount){
-            this.createParticle()
-        }
+        // if (this.particles.length < this.particleCount){
+        //     this.createParticle()
+        // }
+        
 
         const removedParticles = this.particles.filter(p => p.timeToLive <= 0)
         this.particles = this.particles.filter(p => p.timeToLive > 0)
