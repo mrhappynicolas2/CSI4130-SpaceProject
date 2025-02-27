@@ -12,20 +12,22 @@ export default class FireEffect {
         this.particleSpeed = 0.01
         this.particles = []
         this.particleCount = 50
-        const positions = new Float32Array(this.particleCount * 3)
-
         
         for (let i = 0; i < this.particleCount; i++){
             this.createParticle()
         }
 
         this.geometry = new THREE.BufferGeometry()
-        this.geometry.setAttribute('position', new THREE.BufferAttribute(positions, 3))
+        this.geometry.setAttribute('position', 
+            new THREE.BufferAttribute(new Float32Array(this.particleCount * 3), 3))
+        this.geometry.setAttribute('color', 
+            new THREE.BufferAttribute(new Float32Array(this.particleCount * 3)), 3)
 
         this.material = new THREE.PointsMaterial({
             map: new THREE.TextureLoader().load('/models/fire2.png'),
             size: 0.5,
-            color: new THREE.Color().setHex( 0xff3333 ),
+            vertexColors: true,
+            // color: new THREE.Color().setHex( 0xff3333 ),
             transparent: true,
             depthTest: true,
             depthWrite: false,
@@ -52,7 +54,8 @@ export default class FireEffect {
 
     update(){
 
-        const positions = new Float32Array(this.particles.length * 3)
+        const positions = new Float32Array(this.particleCount * 3)
+        const colors = new Float32Array(this.particleCount * 3)
 
         for (let i = 0; i < this.particles.length; i++){
 
@@ -62,10 +65,27 @@ export default class FireEffect {
             positions[i * 3 + 1] = this.particles[i].position.y
             positions[i * 3 + 2] = this.particles[i].position.z
 
+            
+
+            colors[i * 3] = Math.random()
+            colors[i * 3 + 1] = Math.random()
+            colors[i * 3 + 2] = Math.random()
+
+            // positions.push(new THREE.Vector3(
+            //     this.particles[i].position.x, 
+            //     this.particles[i].position.y, 
+            //     this.particles[i].position.z))
+
+            // const color = new THREE.Color()
+            // colors.push(color.setRGB(0, 1, 0))
+
             this.particles[i].timeToLive -= 1
         }
 
+        console.log(colors)
+
         this.geometry.setAttribute('position', new THREE.BufferAttribute(positions, 3))
+        this.geometry.setAttribute('color', new THREE.BufferAttribute(colors, 3))
 
         if (this.particles.length < this.particleCount){
             this.createParticle()
