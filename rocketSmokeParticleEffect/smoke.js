@@ -5,17 +5,16 @@ import * as THREE from 'three';
  */
 export default class SmokeEffect {
 
-    constructor(scene, camera, particlesPosition) {
+    constructor(scene, camera) {
 
         this.timer = 0
-        this.particlesPosition = particlesPosition
         this.scene = scene
         this.camera = camera
         
         this.particles = []
 
-        this.PARTICLE_SPEED = 0.001
-        this.MAX_TIME_TO_LIVE = 1000
+        this.PARTICLE_SPEED = 0.005
+        this.MAX_TIME_TO_LIVE = 200
         this.PARTICLE_COUNT = 100
         
         this.geometry = new THREE.BufferGeometry()
@@ -27,7 +26,7 @@ export default class SmokeEffect {
         this.material = new THREE.ShaderMaterial({
             uniforms: {
                 diffuseTexture: { value: new THREE.TextureLoader().load( '/models/smoke.png' ) },
-                pointMultiplier: { value: 175 }
+                pointMultiplier: { value: 500 }
             },
             vertexShader: `
                 uniform float pointMultiplier;
@@ -62,16 +61,24 @@ export default class SmokeEffect {
 
     }
 
-    createParticle(){
+    createParticle(particlesPosition){
+
+        if (!particlesPosition){
+            throw new Error()
+        }
 
         const particleSpread = 0.2
+        const directionVector = new THREE.Vector3(  
+            1,
+            Math.random() * 2 * particleSpread - particleSpread,
+            Math.random() * 2 * particleSpread - particleSpread
+        )
+        directionVector.applyAxisAngle(new THREE.Vector3(0, 1, 0), Math.PI * -0.15)
+        directionVector.applyAxisAngle(new THREE.Vector3(0, 0, 1), Math.PI * 0.15)
 
         this.particles.push({
-            position: new THREE.Vector3(this.particlesPosition.x, this.particlesPosition.y, this.particlesPosition.z),
-            direction: new THREE.Vector3(
-                Math.random() * 2 * particleSpread - particleSpread,
-                Math.random() * 2 * particleSpread - particleSpread,
-                -1)
+            position: new THREE.Vector3(particlesPosition.x, particlesPosition.y, particlesPosition.z),
+            direction: directionVector
             .normalize().multiplyScalar(this.PARTICLE_SPEED),
             timeToLive: this.MAX_TIME_TO_LIVE,
             alpha: 1.0
@@ -90,15 +97,15 @@ export default class SmokeEffect {
             return 0
         })
 
-        this.update()
+        this.update(particlesPosition)
 
     }
 
-    update(){
+    update(newParticlesPosition){
 
         this.timer ++
         if (this.timer == 50){
-            this.createParticle()
+            this.createParticle(newParticlesPosition)
             this.timer = 0
         }
 
@@ -138,8 +145,6 @@ export default class SmokeEffect {
         //     this.createParticle()
         // }
         
-
-        const removedParticles = this.particles.filter(p => p.timeToLive <= 0)
         this.particles = this.particles.filter(p => p.timeToLive > 0)
 
     }

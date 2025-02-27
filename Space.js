@@ -70,7 +70,8 @@ let lastSecondaryShotTimes = 0;
 // variable for all the stars in the background
 const starField = createStarField();
 
-const smokeEffect = new SmokeEffect(scene, camera, new THREE.Vector3(0, 2, 0))
+const smokeEffect = new SmokeEffect(scene, camera)
+
 
 /**
  * keys state
@@ -748,7 +749,15 @@ function animate(currentDelta) {
         fireParticleSystem.update()
     })
 
-    smokeEffect.update()
+    if (rocket){
+        let initialSmokePosition = new THREE.Vector3(0, 1, 0)
+        let rocketPos = new THREE.Vector3(0, 0, 0) 
+        rocket.getWorldPosition(rocketPos)
+        initialSmokePosition.add(rocketPos)
+        console.log(initialSmokePosition)
+        smokeEffect.update(initialSmokePosition)
+    }
+    
 
     // console.log()
     
