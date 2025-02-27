@@ -21,13 +21,12 @@ export default class FireEffect {
         this.geometry.setAttribute('position', 
             new THREE.BufferAttribute(new Float32Array(this.particleCount * 3), 3))
         this.geometry.setAttribute('color', 
-            new THREE.BufferAttribute(new Float32Array(this.particleCount * 3)), 3)
+            new THREE.BufferAttribute(new Float32Array(this.particleCount * 4)), 4)
 
         this.material = new THREE.PointsMaterial({
             map: new THREE.TextureLoader().load('/models/fire2.png'),
             size: 0.5,
             vertexColors: true,
-            // color: new THREE.Color().setHex( 0xff3333 ),
             transparent: true,
             depthTest: true,
             depthWrite: false,
@@ -65,27 +64,22 @@ export default class FireEffect {
             positions[i * 3 + 1] = this.particles[i].position.y
             positions[i * 3 + 2] = this.particles[i].position.z
 
-            
+            let color = new THREE.Color().setHex(0xff3333)
 
-            colors[i * 3] = Math.random()
-            colors[i * 3 + 1] = Math.random()
-            colors[i * 3 + 2] = Math.random()
+            if (this.particles[i].timeToLive < 20){
+                color = new THREE.Color().setHex(0x000000)
+            }
 
-            // positions.push(new THREE.Vector3(
-            //     this.particles[i].position.x, 
-            //     this.particles[i].position.y, 
-            //     this.particles[i].position.z))
-
-            // const color = new THREE.Color()
-            // colors.push(color.setRGB(0, 1, 0))
+            colors[i * 3] = color.r
+            colors[i * 3 + 1] = color.g
+            colors[i * 3 + 2] = color.b
+            colors[i * 3 + 3] = 0
 
             this.particles[i].timeToLive -= 1
         }
 
-        console.log(colors)
-
         this.geometry.setAttribute('position', new THREE.BufferAttribute(positions, 3))
-        this.geometry.setAttribute('color', new THREE.BufferAttribute(colors, 3))
+        this.geometry.setAttribute('color', new THREE.BufferAttribute(colors, 4))
 
         if (this.particles.length < this.particleCount){
             this.createParticle()
