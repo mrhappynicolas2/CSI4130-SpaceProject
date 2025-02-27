@@ -46,8 +46,8 @@ verticalGrid.position.z = -25; // move the grid to the back of the scene
 scene.add(controls, axesHelper, ambientLight);
 
 const hitboxes = []
+const fireParticleSystems = []
 
-const fireParticleSystem = new FireParticleEffect(scene)
 
 // variables to keep track of rocket and bullets
 let rocketGroup, rocketHealth, rocket;
@@ -118,30 +118,39 @@ loader.load('models/spaceship.glb', function (gltf) {
     // rocket.position.x = 5;
     // rocket.position.y = 0.5;
     rocket.position.y = 0.5;
-  
+
+    fireParticleSystems.push(
+        new FireParticleEffect(rocket, new THREE.Vector3(0, 5.4, -10.25)),
+        new FireParticleEffect(rocket, new THREE.Vector3(-1.5, 3, -10.25)),
+        new FireParticleEffect(rocket, new THREE.Vector3(1.5, 3, -10.25))
+    )
+
     // create geometries and materials
     const sphereGeometry = new THREE.ConeGeometry(1, 2, 16);
     const sphereMaterial = new THREE.MeshBasicMaterial({ color: 0xFFA500 });
     orangeCone = new THREE.Mesh(sphereGeometry, sphereMaterial);
     orangeCone.position.set(0, 5.4, -10.25);
+    
     orangeCone.rotation.x = -Math.PI / 2;
 
     // add to our rocket
-    rocket.add(orangeCone);
+    // rocket.add(orangeCone);
  
     orangeCone2 = new THREE.Mesh(sphereGeometry, sphereMaterial);
     orangeCone2.position.set(-1.5, 3, -10.25);
+    
     orangeCone2.rotation.x = -Math.PI / 2;
 
     // add to our rocket
-    rocket.add(orangeCone2);
+    // rocket.add(orangeCone2);
   
     orangeCone3 = new THREE.Mesh(sphereGeometry, sphereMaterial);
     orangeCone3.position.set(1.5, 3, -10.25);
+    
     orangeCone3.rotation.x = -Math.PI / 2;
 
     // add to our rocket
-    rocket.add(orangeCone3);
+    // rocket.add(orangeCone3);
 
 }, undefined, function (error) {
     // in case of error
@@ -732,7 +741,9 @@ function animate(currentDelta) {
     }
 
     checkForAsteroidCollision()
-    fireParticleSystem.update()
+    fireParticleSystems.forEach(fireParticleSystem=>{
+        fireParticleSystem.update()
+    })
 
     // console.log()
     

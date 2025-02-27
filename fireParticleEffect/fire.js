@@ -5,30 +5,18 @@ import * as THREE from 'three';
  */
 export default class FireEffect {
 
-    constructor(scene) {
+    constructor(scene, particlesPosition) {
+
+        this.particlesPosition = particlesPosition
         this.scene = scene
-        this.particleCount = 5
         this.particleSpeed = 0.01
         this.particles = []
-
+        this.particleCount = 50
         const positions = new Float32Array(this.particleCount * 3)
 
+        
         for (let i = 0; i < this.particleCount; i++){
-
-            const x = 0
-            const y = 0
-            const z = 0
-
-            positions[i * 3] = x
-            positions[i * 3 + 1] = y
-            positions[i * 3 + 2] = x
-
-            this.particles.push({
-                position: new THREE.Vector3(x, y, z),
-                direction: new THREE.Vector3(1, Math.random() - 0.5, Math.random() - 0.5)
-                .normalize().multiplyScalar(this.particleSpeed),
-                timeToLive: 4
-            })
+            this.createParticle()
         }
 
         this.geometry = new THREE.BufferGeometry()
@@ -36,13 +24,14 @@ export default class FireEffect {
 
         this.material = new THREE.PointsMaterial({
             map: new THREE.TextureLoader().load('/models/fire2.png'),
-            size: 1,
-            color: 'red',
+            size: 0.5,
+            color: new THREE.Color().setHex( 0xff3333 ),
             transparent: true,
             depthTest: true,
             depthWrite: false,
             blending: THREE.AdditiveBlending,
-            alphaTest: 0.01
+            alphaTest: 0.01,
+            
         }) 
 
         const points = new THREE.Points(this.geometry, this.material)
@@ -50,9 +39,19 @@ export default class FireEffect {
 
     }
 
+    createParticle(){
+
+        this.particles.push({
+            position: new THREE.Vector3(this.particlesPosition.x, this.particlesPosition.y, this.particlesPosition.z),
+            direction: new THREE.Vector3(Math.random() - 0.5, Math.random() - 0.5, -1)
+            .normalize().multiplyScalar(this.particleSpeed),
+            timeToLive: 50
+        })
+
+    }
+
     update(){
 
-        const particleIndicesToRemove = []
         const positions = new Float32Array(this.particles.length * 3)
 
         for (let i = 0; i < this.particles.length; i++){
@@ -63,14 +62,18 @@ export default class FireEffect {
             positions[i * 3 + 1] = this.particles[i].position.y
             positions[i * 3 + 2] = this.particles[i].position.z
 
-            this.particles[i].timeToLive -= 0.01
+            this.particles[i].timeToLive -= 1
         }
 
         this.geometry.setAttribute('position', new THREE.BufferAttribute(positions, 3))
 
+        if (this.particles.length < this.particleCount){
+            this.createParticle()
+        }
+
         const removedParticles = this.particles.filter(p => p.timeToLive <= 0)
         this.particles = this.particles.filter(p => p.timeToLive > 0)
-        // console.log(removedParticles)
+
     }
 
     
