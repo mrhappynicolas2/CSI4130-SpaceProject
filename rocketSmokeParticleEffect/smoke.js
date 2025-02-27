@@ -1,9 +1,9 @@
 import * as THREE from 'three';
 
 /**
- * FireEffect class to create fire particles
+ * Smoke particle effect class to create smoke particles
  */
-export default class FireEffect {
+export default class SmokeEFfect {
 
     constructor(scene, particlesPosition) {
 
@@ -13,12 +13,27 @@ export default class FireEffect {
         this.particles = []
         this.particleCount = 50
         
+        for (let i = 0; i < this.particleCount; i++){
+            this.createParticle()
+        }
+
         this.geometry = new THREE.BufferGeometry()
         this.geometry.setAttribute('position', 
             new THREE.BufferAttribute(new Float32Array(this.particleCount * 3), 3))
         this.geometry.setAttribute('color', 
             new THREE.BufferAttribute(new Float32Array(this.particleCount * 4)), 4)
 
+        // this.material = new THREE.PointsMaterial({
+        //     map: new THREE.TextureLoader().load('/models/fire2.png'),
+        //     size: 0.5,
+        //     vertexColors: true,
+        //     transparent: true,
+        //     depthTest: true,
+        //     depthWrite: false,
+        //     blending: THREE.AdditiveBlending,
+        //     alphaTest: 0.01,
+            
+        // }) 
 
         this.material = new THREE.ShaderMaterial({
             uniforms: {
@@ -28,13 +43,14 @@ export default class FireEffect {
             vertexShader: `
                 uniform float pointMultiplier;
 
+                attribute vec3 color;
                 varying vec4 vColor;
 
                 void main(){
                     gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
                     gl_PointSize = pointMultiplier / gl_Position.w;
 
-                    vColor = color;
+                    vColor = vec4(color, 0.0);
                 }
             `,
             fragmentShader: `
@@ -43,7 +59,7 @@ export default class FireEffect {
                 varying vec4 vColor;
 
                 void main(){
-                    gl_FragColor = texture2D(diffuseTexture, gl_PointCoord);
+                    gl_FragColor = texture2D(diffuseTexture, gl_PointCoord) * vColor;
                 }
             `,
             transparent: true,
@@ -67,8 +83,6 @@ export default class FireEffect {
             timeToLive: 50
         })
 
-        this.update()
-
     }
 
     update(){
@@ -84,7 +98,8 @@ export default class FireEffect {
             positions[i * 3 + 1] = this.particles[i].position.y
             positions[i * 3 + 2] = this.particles[i].position.z
 
-            let color = new THREE.Color().setHex(0xff3333)
+            // let color = new THREE.Color().setHex(0xff3333)
+            let color = new THREE.Color().setHex(0x00ff00)
 
             if (this.particles[i].timeToLive < 20){
                 color = new THREE.Color().setHex(0x000000)
