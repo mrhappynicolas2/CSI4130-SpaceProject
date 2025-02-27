@@ -23,17 +23,44 @@ export default class FireEffect {
         this.geometry.setAttribute('color', 
             new THREE.BufferAttribute(new Float32Array(this.particleCount * 4)), 4)
 
-        this.material = new THREE.PointsMaterial({
-            map: new THREE.TextureLoader().load('/models/fire2.png'),
-            size: 0.5,
-            vertexColors: true,
+        // this.material = new THREE.PointsMaterial({
+        //     map: new THREE.TextureLoader().load('/models/fire2.png'),
+        //     size: 0.5,
+        //     vertexColors: true,
+        //     transparent: true,
+        //     depthTest: true,
+        //     depthWrite: false,
+        //     blending: THREE.AdditiveBlending,
+        //     alphaTest: 0.01,
+            
+        // }) 
+
+        this.material = new THREE.ShaderMaterial({
+            uniforms: {
+                diffuseTexture: { value: new THREE.TextureLoader().load( '/models/fire2.png' ) },
+                pointMultiplier: { value: 175 }
+            },
+            vertexShader: `
+                uniform float pointMultiplier;
+
+                void main(){
+                    gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
+                    gl_PointSize = pointMultiplier / gl_Position.w;
+                }
+            `,
+            fragmentShader: `
+                uniform sampler2D diffuseTexture;
+
+                void main(){
+                    gl_FragColor = texture2D(diffuseTexture, gl_PointCoord);
+                }
+            `,
             transparent: true,
             depthTest: true,
             depthWrite: false,
-            blending: THREE.AdditiveBlending,
-            alphaTest: 0.01,
-            
-        }) 
+            vertexColors: true,
+            blending: THREE.AdditiveBlending
+        })
 
         const points = new THREE.Points(this.geometry, this.material)
         this.scene.add(points)

@@ -120,9 +120,9 @@ loader.load('models/spaceship.glb', function (gltf) {
     rocket.position.y = 0.5;
 
     fireParticleSystems.push(
-        new FireParticleEffect(rocket, new THREE.Vector3(0, 5.4, -10.25)),
-        new FireParticleEffect(rocket, new THREE.Vector3(-1.5, 3, -10.25)),
-        new FireParticleEffect(rocket, new THREE.Vector3(1.5, 3, -10.25))
+        new FireParticleEffect(rocket, new THREE.Vector3(0, 5.4, -9.5)),
+        new FireParticleEffect(rocket, new THREE.Vector3(-1.5, 3, -9.5)),
+        new FireParticleEffect(rocket, new THREE.Vector3(1.5, 3, -9.5))
     )
 
     // create geometries and materials
