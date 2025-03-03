@@ -868,7 +868,7 @@ function startGame() {
 
         // create the planet and add it to our scene
         const planet = new THREE.Mesh(planetGeometry, planetMaterial);
-        planet.position.set(-50, 0, 20);
+        planet.position.set(-500, 0, 0);
         scene.add(planet);
 
         // create ring geometry and material
@@ -881,10 +881,11 @@ function startGame() {
 
         // construct the rings and add it to our scene (same spot as our saturn planet)
         const rings = new THREE.Mesh(ringGeometry, ringMaterial);
-        rings.position.set(-50, 0, 20);
+        rings.position.set(-500, 0, 0);
 
         // tilt it so it looks realistic
         rings.rotation.x = Math.PI / 2.5;
+        rings.rotation.y = Math.PI / 4;
 
         // add it to our scene
         scene.add(rings);
@@ -900,11 +901,24 @@ function startGame() {
             // making the rings rotate around the z axis give a spinning effect (this is nicer - ignore comment above)
             planet.rotation.y += 0.005;
             rings.rotation.z += 0.005;
-            planet.position.x += 0.005
-            rings.position.x += 0.005
+            console.log(planet.scale)
+            let scaleX = planet.scale.x
+            let scaleY = planet.scale.y
+            let scaleZ = planet.scale.z
+            
+            if(planet.scale.x < 40){
+                planet.scale.set(scaleX*1.001, scaleY*1.001, scaleZ*1.001)
+                rings.scale.set(scaleX*1.001, scaleY*1.001, scaleZ*1.001)
+            }
+            else if(planet.scale.x >= 35 && planet.scale.x < 40){
+                planet.scale.set(scaleX*1.0001, scaleY*1.0001, scaleZ*1.0001)
+                rings.scale.set(scaleX*1.0001, scaleY*1.0001, scaleZ*1.0001)
+                warp.color = new THREE.Color(0xFFA500) //orange
+            }
+            else{
+                warp.visible = false
+            }
         }
-
-        // call the animation function to rotate our planet
         animateSaturn();
     }
 
